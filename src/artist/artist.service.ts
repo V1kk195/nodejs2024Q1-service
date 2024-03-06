@@ -7,7 +7,6 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './interfaces/artist.interface';
 import { validateUuid } from '../helpers';
-import { User } from '../user/interfaces/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -50,7 +49,7 @@ export class ArtistService {
     const artistIndex = this.artists.findIndex((artist) => artist.id === id);
 
     if (artistIndex === -1) {
-      throw new NotFoundException(`User ${id} not found`);
+      throw new NotFoundException(`Artist ${id} not found`);
     }
 
     this.artists[artistIndex] = {
@@ -67,7 +66,7 @@ export class ArtistService {
     const artist = this.artists.find((artist) => artist.id === id);
 
     if (!artist) {
-      throw new NotFoundException(`User ${id} not found`);
+      throw new NotFoundException(`Artist ${id} not found`);
     }
 
     this.artists = this.artists.filter((artist) => artist.id !== id);
