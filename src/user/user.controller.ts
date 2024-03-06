@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -40,7 +41,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<string> {
+  @HttpCode(204)
+  async remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(id);
   }
 }

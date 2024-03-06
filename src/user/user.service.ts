@@ -7,13 +7,8 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-user.dto';
 import { User } from './interfaces/user.interface';
-import { v4 as uuidv4, validate } from 'uuid';
-
-const validateUuid = (id: string): void => {
-  if (!validate(id)) {
-    throw new BadRequestException(`Id ${id} is not valid UUID`);
-  }
-};
+import { v4 as uuidv4 } from 'uuid';
+import { validateUuid } from '../helpers';
 
 const getUserWithoutPassword = (user: User): User => {
   const userWithoutPassword = { ...user };
@@ -84,7 +79,7 @@ export class UserService {
     return getUserWithoutPassword(this.users[userIndex]);
   }
 
-  remove(id: string): string {
+  remove(id: string): void {
     validateUuid(id);
 
     const user = this.users.find((user) => user.id === id);
@@ -93,8 +88,6 @@ export class UserService {
       throw new NotFoundException(`User ${id} not found`);
     }
 
-    this.users = this.users.filter((user) => user.id === id);
-
-    return `User ${id} deleted`;
+    this.users = this.users.filter((user) => user.id !== id);
   }
 }
