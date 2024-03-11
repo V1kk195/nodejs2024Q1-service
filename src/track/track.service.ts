@@ -8,10 +8,12 @@ import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './interfaces/track.interface';
 import { validateUuid } from '../helpers';
 import { v4 as uuidv4 } from 'uuid';
+import { FavouriteService } from '../favourite/favourite.service';
+import { db } from 'src/db';
 
 @Injectable()
 export class TrackService {
-  private tracks: Track[] = [];
+  constructor(private readonly favouriteService: FavouriteService) {}
 
   create(createTrackDto: CreateTrackDto): Track {
     if (
@@ -27,19 +29,19 @@ export class TrackService {
       ...createTrackDto,
       id: uuidv4(),
     };
-    this.tracks.push(track);
+    db.tracks.push(track);
 
     return track;
   }
 
   findAll(): Track[] {
-    return this.tracks;
+    return db.tracks;
   }
 
   findOne(id: string): Track {
     validateUuid(id);
 
-    const track = this.tracks.find((track) => track.id === id);
+    const track = db.tracks.find((track) => track.id === id);
 
     if (!track) {
       throw new NotFoundException(`Track ${id} not found`);
@@ -51,29 +53,30 @@ export class TrackService {
   update(id: string, updateTrackDto: UpdateTrackDto): Track {
     validateUuid(id);
 
-    const trackIndex = this.tracks.findIndex((track) => track.id === id);
+    const trackIndex = db.tracks.findIndex((track) => track.id === id);
 
     if (trackIndex === -1) {
       throw new NotFoundException(`Track ${id} not found`);
     }
 
-    this.tracks[trackIndex] = {
-      ...this.tracks[trackIndex],
+    db.tracks[trackIndex] = {
+      ...db.tracks[trackIndex],
       ...updateTrackDto,
     };
 
-    return this.tracks[trackIndex];
+    return db.tracks[trackIndex];
   }
 
   remove(id: string): void {
     validateUuid(id);
 
-    const track = this.tracks.find((track) => track.id === id);
+    const track = db.tracks.find((track) => track.id === id);
 
     if (!track) {
       throw new NotFoundException(`Track ${id} not found`);
     }
 
-    this.tracks = this.tracks.filter((track) => track.id !== id);
+    db.tracks = db.tracks.filter((track) => track.id !== id);
+    this.favouriteService.removeTrack(id);
   }
 }
