@@ -8,10 +8,12 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './interfaces/album.interface';
 import { validateUuid } from '../helpers';
 import { v4 as uuidv4 } from 'uuid';
+import { db } from '../db';
+import { FavouriteService } from '../favourite/favourite.service';
 
 @Injectable()
 export class AlbumService {
-  private albums: Album[] = [];
+  constructor(private readonly favouriteService: FavouriteService) {}
 
   create(createAlbumDto: CreateAlbumDto): Album {
     if (
@@ -26,19 +28,19 @@ export class AlbumService {
       ...createAlbumDto,
       id: uuidv4(),
     };
-    this.albums.push(album);
+    db.albums.push(album);
 
     return album;
   }
 
   findAll(): Album[] {
-    return this.albums;
+    return db.albums;
   }
 
   findOne(id: string): Album {
     validateUuid(id);
 
-    const album = this.albums.find((album) => album.id === id);
+    const album = db.albums.find((album) => album.id === id);
 
     if (!album) {
       throw new NotFoundException(`Album ${id} not found`);
@@ -50,29 +52,30 @@ export class AlbumService {
   update(id: string, updateAlbumDto: UpdateAlbumDto): Album {
     validateUuid(id);
 
-    const albumIndex = this.albums.findIndex((album) => album.id === id);
+    const albumIndex = db.albums.findIndex((album) => album.id === id);
 
     if (albumIndex === -1) {
       throw new NotFoundException(`Album ${id} not found`);
     }
 
-    this.albums[albumIndex] = {
-      ...this.albums[albumIndex],
+    db.albums[albumIndex] = {
+      ...db.albums[albumIndex],
       ...updateAlbumDto,
     };
 
-    return this.albums[albumIndex];
+    return db.albums[albumIndex];
   }
 
   remove(id: string): void {
     validateUuid(id);
 
-    const album = this.albums.find((album) => album.id === id);
+    const album = db.albums.find((album) => album.id === id);
 
     if (!album) {
       throw new NotFoundException(`Album ${id} not found`);
     }
 
-    this.albums = this.albums.filter((track) => track.id !== id);
+    db.albums = db.albums.filter((track) => track.id !== id);
+    this.favouriteService.removeTrack(id);
   }
 }

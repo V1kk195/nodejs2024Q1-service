@@ -8,6 +8,7 @@ import { Favorites, FavoritesResponse } from './interfaces/favourite.interface';
 import { Track } from '../track/interfaces/track.interface';
 import { validateUuid } from '../helpers';
 import { db } from '../db';
+import { Album } from '../album/interfaces/album.interface';
 
 @Injectable()
 export class FavouriteService {
@@ -25,6 +26,20 @@ export class FavouriteService {
     this.favourites.tracks.push(id);
 
     return track;
+  }
+
+  addAlbum(id: string): Album {
+    validateUuid(id);
+
+    const album = db.albums.find((item) => id === item.id);
+
+    if (!album) {
+      throw new UnprocessableEntityException(`Album ${id} not found`);
+    }
+
+    this.favourites.albums.push(id);
+
+    return album;
   }
 
   findAll(): FavoritesResponse {
@@ -63,6 +78,20 @@ export class FavouriteService {
     }
 
     this.favourites.tracks = this.favourites.tracks.filter(
+      (item) => item !== id,
+    );
+  }
+
+  removeAlbum(id: string): void {
+    validateUuid(id);
+
+    const album = this.favourites.albums.find((item) => item === id);
+
+    if (!album) {
+      throw new NotFoundException(`Album ${id} is not favourite`);
+    }
+
+    this.favourites.albums = this.favourites.albums.filter(
       (item) => item !== id,
     );
   }
