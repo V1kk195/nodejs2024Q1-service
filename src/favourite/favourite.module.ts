@@ -5,6 +5,5 @@ import { FavouriteController } from './favourite.controller';
 @Module({
   controllers: [FavouriteController],
   providers: [FavouriteService],
-  exports: [FavouriteService],
 })
 export class FavouriteModule {}

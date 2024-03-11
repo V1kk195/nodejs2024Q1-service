@@ -1,29 +1,14 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './interfaces/album.interface';
 import { validateUuid } from '../helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
-import { FavouriteService } from '../favourite/favourite.service';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly favouriteService: FavouriteService) {}
-
   create(createAlbumDto: CreateAlbumDto): Album {
-    if (
-      !createAlbumDto.name ||
-      !createAlbumDto.year ||
-      createAlbumDto.artistId === undefined
-    ) {
-      throw new BadRequestException('Missing fields');
-    }
-
     const album: Album = {
       ...createAlbumDto,
       id: uuidv4(),
@@ -75,7 +60,12 @@ export class AlbumService {
       throw new NotFoundException(`Album ${id} not found`);
     }
 
-    db.albums = db.albums.filter((track) => track.id !== id);
-    this.favouriteService.removeTrack(id);
+    db.albums = db.albums.filter((album) => album.id !== id);
+    db.favourites.albums = db.favourites.albums.filter((item) => item !== id);
+    db.tracks.forEach((track) => {
+      if (track.albumId === id) {
+        track.albumId = null;
+      }
+    });
   }
 }

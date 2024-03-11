@@ -8,13 +8,10 @@ import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './interfaces/track.interface';
 import { validateUuid } from '../helpers';
 import { v4 as uuidv4 } from 'uuid';
-import { FavouriteService } from '../favourite/favourite.service';
 import { db } from 'src/db';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly favouriteService: FavouriteService) {}
-
   create(createTrackDto: CreateTrackDto): Track {
     if (
       !createTrackDto.name ||
@@ -77,6 +74,6 @@ export class TrackService {
     }
 
     db.tracks = db.tracks.filter((track) => track.id !== id);
-    this.favouriteService.removeTrack(id);
+    db.favourites.tracks = db.favourites.tracks.filter((item) => item !== id);
   }
 }
