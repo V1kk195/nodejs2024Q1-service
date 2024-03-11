@@ -1,40 +1,31 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './interfaces/artist.interface';
 import { validateUuid } from '../helpers';
 import { v4 as uuidv4 } from 'uuid';
+import { db } from '../db';
 
 @Injectable()
 export class ArtistService {
-  private artists: Artist[] = [];
-
   create(createArtistDto: CreateArtistDto): Artist {
-    if (!createArtistDto.name || createArtistDto.grammy === undefined) {
-      throw new BadRequestException('Missing field name or grammy');
-    }
-
     const artist: Artist = {
       ...createArtistDto,
       id: uuidv4(),
     };
-    this.artists.push(artist);
+    db.artists.push(artist);
 
     return artist;
   }
 
   findAll(): Artist[] {
-    return this.artists;
+    return db.artists;
   }
 
   findOne(id: string): Artist {
     validateUuid(id);
 
-    const artist = this.artists.find((artist) => artist.id === id);
+    const artist = db.artists.find((artist) => artist.id === id);
 
     if (!artist) {
       throw new NotFoundException(`Artist ${id} not found`);
@@ -46,29 +37,40 @@ export class ArtistService {
   update(id: string, updateArtistDto: UpdateArtistDto): Artist {
     validateUuid(id);
 
-    const artistIndex = this.artists.findIndex((artist) => artist.id === id);
+    const artistIndex = db.artists.findIndex((artist) => artist.id === id);
 
     if (artistIndex === -1) {
       throw new NotFoundException(`Artist ${id} not found`);
     }
 
-    this.artists[artistIndex] = {
-      ...this.artists[artistIndex],
+    db.artists[artistIndex] = {
+      ...db.artists[artistIndex],
       ...updateArtistDto,
     };
 
-    return this.artists[artistIndex];
+    return db.artists[artistIndex];
   }
 
   remove(id: string): void {
     validateUuid(id);
 
-    const artist = this.artists.find((artist) => artist.id === id);
+    const artist = db.artists.find((artist) => artist.id === id);
 
     if (!artist) {
       throw new NotFoundException(`Artist ${id} not found`);
     }
 
-    this.artists = this.artists.filter((artist) => artist.id !== id);
+    db.artists = db.artists.filter((artist) => artist.id !== id);
+    db.favourites.artists = db.favourites.artists.filter((item) => item !== id);
+    db.tracks.forEach((track) => {
+      if (track.artistId === id) {
+        track.artistId = null;
+      }
+    });
+    db.albums.forEach((album) => {
+      if (album.artistId === id) {
+        album.artistId = null;
+      }
+    });
   }
 }

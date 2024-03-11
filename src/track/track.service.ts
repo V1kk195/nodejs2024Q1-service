@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './interfaces/track.interface';
@@ -13,15 +9,6 @@ import { db } from 'src/db';
 @Injectable()
 export class TrackService {
   create(createTrackDto: CreateTrackDto): Track {
-    if (
-      !createTrackDto.name ||
-      !createTrackDto.duration ||
-      createTrackDto.artistId === undefined ||
-      createTrackDto.albumId === undefined
-    ) {
-      throw new BadRequestException('Missing fields');
-    }
-
     const track: Track = {
       ...createTrackDto,
       id: uuidv4(),
