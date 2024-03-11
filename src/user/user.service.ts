@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -9,6 +8,7 @@ import { UpdatePasswordDto } from './dto/update-user.dto';
 import { User } from './interfaces/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { validateUuid } from '../helpers';
+import { db } from '../db';
 
 const getUserWithoutPassword = (user: User): User => {
   const userWithoutPassword = { ...user };
@@ -19,33 +19,27 @@ const getUserWithoutPassword = (user: User): User => {
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
-
   create(createUserDto: CreateUserDto) {
-    if (!createUserDto.login || !createUserDto.password) {
-      throw new BadRequestException('Missing field login or password');
-    }
-
     const user: User = {
       ...createUserDto,
       createdAt: new Date().getTime(),
       id: uuidv4(),
       updatedAt: new Date().getTime(),
-      version: 0,
+      version: 1,
     };
-    this.users.push(user);
+    db.users.push(user);
 
     return getUserWithoutPassword(user);
   }
 
   findAll(): User[] {
-    return this.users.map((user) => getUserWithoutPassword(user));
+    return db.users.map((user) => getUserWithoutPassword(user));
   }
 
   findOne(id: string): User {
     validateUuid(id);
 
-    const user = this.users.find((user) => user.id === id);
+    const user = db.users.find((user) => user.id === id);
 
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
@@ -57,37 +51,37 @@ export class UserService {
   update(id: string, updatePasswordDto: UpdatePasswordDto): User {
     validateUuid(id);
 
-    const userIndex = this.users.findIndex((user) => user.id === id);
+    const userIndex = db.users.findIndex((user) => user.id === id);
 
     if (userIndex === -1) {
       throw new NotFoundException(`User ${id} not found`);
     }
 
-    const user = this.users[userIndex];
+    const user = db.users[userIndex];
 
     if (user.password !== updatePasswordDto.oldPassword) {
       throw new ForbiddenException(`Old password is incorrect`);
     }
 
-    this.users[userIndex] = {
+    db.users[userIndex] = {
       ...user,
       version: user.version + 1,
       updatedAt: new Date().getTime(),
       password: updatePasswordDto.newPassword,
     };
 
-    return getUserWithoutPassword(this.users[userIndex]);
+    return getUserWithoutPassword(db.users[userIndex]);
   }
 
   remove(id: string): void {
     validateUuid(id);
 
-    const user = this.users.find((user) => user.id === id);
+    const user = db.users.find((user) => user.id === id);
 
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
     }
 
-    this.users = this.users.filter((user) => user.id !== id);
+    db.users = db.users.filter((user) => user.id !== id);
   }
 }
