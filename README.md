@@ -20,7 +20,7 @@ npm install
 ## Running application
 
 ```
-npm start
+docker compose -f docker-compose.yml up --build
 ```
 
 After starting the app on port (4000 as default) you can open
