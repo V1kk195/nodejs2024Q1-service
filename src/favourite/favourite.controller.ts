@@ -11,7 +11,7 @@ import {
 import { FavouriteService } from './favourite.service';
 import { UpdateFavouriteDto } from './dto/update-favourite.dto';
 import { FavoritesResponse } from './interfaces/favourite.interface';
-import { Album } from '../album/interfaces/album.interface';
+import { Album } from '../album/entity/album.entity';
 import { Artist } from '../artist/interfaces/artist.interface';
 
 @Controller('favs')

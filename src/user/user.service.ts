@@ -1,14 +1,17 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-user.dto';
-import { User } from './interfaces/user.interface';
+import { User } from './entity/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { validateUuid } from '../helpers';
 import { db } from '../db';
+import { dbConstants } from '../constants';
+import { Repository } from 'typeorm';
 
 const getUserWithoutPassword = (user: User): User => {
   const userWithoutPassword = { ...user };
@@ -19,6 +22,11 @@ const getUserWithoutPassword = (user: User): User => {
 
 @Injectable()
 export class UserService {
+  constructor(
+    @Inject(dbConstants.USER_REPOSITORY)
+    private userRepository: Repository<User>,
+  ) {}
+
   create(createUserDto: CreateUserDto) {
     const user: User = {
       ...createUserDto,

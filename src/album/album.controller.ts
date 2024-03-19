@@ -11,7 +11,7 @@ import {
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album } from './interfaces/album.interface';
+import { Album } from './entity/album.entity';
 
 @Controller('album')
 export class AlbumController {
