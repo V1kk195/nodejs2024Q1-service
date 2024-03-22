@@ -1,23 +1,53 @@
-import { Column, Entity, Generated, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string; // uuid v4
 
-  @Column()
+  @Column({ unique: true })
   login: string;
 
-  @Column()
+  @Column({
+    select: false,
+  })
   password: string;
 
-  @Column('int')
-  @Generated('increment')
+  @Column({
+    type: 'int',
+    default: 1,
+  })
   version: number; // integer number, increments on update
 
-  @Column('timestamp')
-  createdAt: number; // timestamp of creation
+  @Column({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: {
+      to: (value: Date) => value,
+      from: (value: string) => new Date(value).valueOf(),
+    },
+  })
+  createdAt: number | Date; // timestamp of creation
 
-  @Column('timestamp')
-  updatedAt: number; // timestamp of last update
+  @Column({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+    transformer: {
+      to: (value: Date) => value,
+      from: (value: string) => new Date(value).valueOf(),
+    },
+  })
+  updatedAt: number | Date; // timestamp of last update
+
+  @BeforeUpdate()
+  updateVersion() {
+    this.version = this.version + 1;
+  }
+
+  @BeforeUpdate()
+  updateDates() {
+    this.updatedAt = new Date();
+  }
 }
