@@ -5,9 +5,16 @@ import { Album } from './entity/album.entity';
 import { validateUuid } from '../helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
+  constructor(
+    @InjectRepository(Album)
+    private albumRepository: Repository<Album>,
+  ) {}
+
   create(createAlbumDto: CreateAlbumDto): Album {
     const album: Album = {
       ...createAlbumDto,

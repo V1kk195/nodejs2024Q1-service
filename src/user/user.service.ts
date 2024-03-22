@@ -1,6 +1,5 @@
 import {
   ForbiddenException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,8 +9,8 @@ import { User } from './entity/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { validateUuid } from '../helpers';
 import { db } from '../db';
-import { dbConstants } from '../constants';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 const getUserWithoutPassword = (user: User): User => {
   const userWithoutPassword = { ...user };
@@ -23,7 +22,7 @@ const getUserWithoutPassword = (user: User): User => {
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(dbConstants.USER_REPOSITORY)
+    @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
