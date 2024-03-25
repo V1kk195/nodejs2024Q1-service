@@ -1,31 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Track } from './interfaces/track.interface';
+import { TrackEntity } from './entity/track.entity';
 import { validateUuid } from '../helpers';
-import { v4 as uuidv4 } from 'uuid';
-import { db } from 'src/db';
+import { Track } from '../types/interfaces';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  create(createTrackDto: CreateTrackDto): Track {
-    const track: Track = {
-      ...createTrackDto,
-      id: uuidv4(),
-    };
-    db.tracks.push(track);
+  constructor(
+    @InjectRepository(TrackEntity)
+    private tracksRepository: Repository<TrackEntity>,
+  ) {}
 
-    return track;
+  async create(createTrackDto: CreateTrackDto): Promise<Track> {
+    try {
+      return await this.tracksRepository.save(createTrackDto);
+    } catch (e) {
+      throw new ForbiddenException(e.detail);
+    }
   }
 
-  findAll(): Track[] {
-    return db.tracks;
+  findAll(): Promise<Track[]> {
+    return this.tracksRepository.find();
   }
 
-  findOne(id: string): Track {
+  async findOne(id: string): Promise<Track> {
     validateUuid(id);
 
-    const track = db.tracks.find((track) => track.id === id);
+    const track = await this.tracksRepository.findOneBy({ id });
 
     if (!track) {
       throw new NotFoundException(`Track ${id} not found`);
@@ -34,33 +42,32 @@ export class TrackService {
     return track;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto): Track {
+  async update(id: string, updateTrackDto: UpdateTrackDto): Promise<Track> {
     validateUuid(id);
 
-    const trackIndex = db.tracks.findIndex((track) => track.id === id);
+    const track = await this.tracksRepository.findOneBy({ id });
 
-    if (trackIndex === -1) {
+    if (!track) {
       throw new NotFoundException(`Track ${id} not found`);
     }
 
-    db.tracks[trackIndex] = {
-      ...db.tracks[trackIndex],
+    return this.tracksRepository.save({
+      ...track,
       ...updateTrackDto,
-    };
-
-    return db.tracks[trackIndex];
+    });
   }
 
-  remove(id: string): void {
+  async remove(id: string): Promise<void> {
     validateUuid(id);
 
-    const track = db.tracks.find((track) => track.id === id);
+    const track = await this.tracksRepository.findOneBy({ id });
 
     if (!track) {
       throw new NotFoundException(`Track ${id} not found`);
     }
 
-    db.tracks = db.tracks.filter((track) => track.id !== id);
-    db.favourites.tracks = db.favourites.tracks.filter((item) => item !== id);
+    await this.tracksRepository.delete(id);
+
+    // db.favourites.tracks = db.favourites.tracks.filter((item) => item !== id);
   }
 }

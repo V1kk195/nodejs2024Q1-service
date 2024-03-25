@@ -1,8 +1,6 @@
-import { Track } from './track/interfaces/track.interface';
-import { Album } from './album/entity/album.entity';
-import { Artist } from './artist/interfaces/artist.interface';
 import { Favorites } from './favourite/interfaces/favourite.interface';
-import { User } from './user/entity/user.entity';
+
+import { Album, Artist, Track, User } from './types/interfaces';
 
 export const db: {
   users: User[];

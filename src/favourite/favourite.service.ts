@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common';
 import { UpdateFavouriteDto } from './dto/update-favourite.dto';
 import { FavoritesResponse } from './interfaces/favourite.interface';
-import { Track } from '../track/interfaces/track.interface';
 import { validateUuid } from '../helpers';
 import { db } from '../db';
-import { Album } from '../album/entity/album.entity';
-import { Artist } from '../artist/interfaces/artist.interface';
+import { AlbumEntity } from '../album/entity/album.entity';
+import { ArtistEntity } from '../artist/entity/artist.entity';
+import { Album, Track } from '../types/interfaces';
 
 @Injectable()
 export class FavouriteService {
@@ -41,7 +41,7 @@ export class FavouriteService {
     return album;
   }
 
-  addArtist(id: string): Artist {
+  addArtist(id: string): ArtistEntity {
     validateUuid(id);
 
     const artist = db.artists.find((item) => id === item.id);

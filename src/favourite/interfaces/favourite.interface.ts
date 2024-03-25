@@ -1,6 +1,4 @@
-import { Artist } from '../../artist/interfaces/artist.interface';
-import { Album } from '../../album/entity/album.entity';
-import { Track } from '../../track/interfaces/track.interface';
+import { Album, Artist, Track } from '../../types/interfaces';
 
 export interface Favorites {
   artists: string[]; // favorite artists ids
