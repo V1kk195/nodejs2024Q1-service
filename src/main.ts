@@ -10,11 +10,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
 
-  const document = yaml.load(
-    readFileSync('doc/api.yaml', { encoding: 'utf-8' }),
-  );
-
-  SwaggerModule.setup('doc', app, document as OpenAPIObject);
+  try {
+    const document = yaml.load(
+      readFileSync('doc/api.yaml', { encoding: 'utf-8' }),
+    );
+    SwaggerModule.setup('doc', app, document as OpenAPIObject);
+  } catch (error) {
+    console.error('Error loading YAML document:', error);
+  }
 
   await app.listen(PROCESS.env.PORT || 4000);
 }

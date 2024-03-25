@@ -1,0 +1,42 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-node
+      target: dev
+    container_name: nodejs-app
+    env_file:
+      - .env
+    restart: always
+    environment:
+      NODE_ENV: production
+    ports:
+      - ${PORT}:${PORT}
+      - 9229:9229
+    volumes:
+      - ./src:/usr/src/app/src
+    networks:
+      - my-network
+    depends_on:
+      - db
+
+  db:
+    container_name: my_postgres
+#    build:
+#      dockerfile: docker/Dockerfile-postgres
+    image: postgres:latest
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - my-network
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  pgdata:
