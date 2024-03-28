@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as PROCESS from 'process';
@@ -6,11 +6,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { readFileSync } from 'node:fs';
 import * as yaml from 'js-yaml';
 import { Logger } from './logger/logger.service';
+import { AllExceptionsFilter } from './exceptionFilter/exceptionFilter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
   app.useLogger(new Logger());
   app.useGlobalPipes(new ValidationPipe());
 
