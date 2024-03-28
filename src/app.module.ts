@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,6 +8,7 @@ import { TrackModule } from './track/track.module';
 import { AlbumModule } from './album/album.module';
 import { FavouriteModule } from './favourite/favourite.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { HttpLoggerMiddleware } from './logger/httpLogger.middleware';
 
 const dataSourceOptions: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -34,4 +35,8 @@ const dataSourceOptions: TypeOrmModuleOptions = {
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}
