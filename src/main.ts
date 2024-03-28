@@ -5,9 +5,13 @@ import * as PROCESS from 'process';
 import { ValidationPipe } from '@nestjs/common';
 import { readFileSync } from 'node:fs';
 import * as yaml from 'js-yaml';
+import { Logger } from './logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+  app.useLogger(new Logger());
   app.useGlobalPipes(new ValidationPipe());
 
   try {
